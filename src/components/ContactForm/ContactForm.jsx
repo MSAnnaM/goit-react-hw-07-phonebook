@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from '../../redux/contactSlice';
 import { nanoid } from '@reduxjs/toolkit';
 import { Form, Input, Button } from './ContactForm.styled';
 import Notiflix from 'notiflix';
 import { selectContacts } from '../../redux/selectors';
+import { addNewContact } from '../../redux/api';
 
 export const ContactForm = () => {
   const contacts = useSelector(selectContacts);
+  const arrContacts = contacts.items;
   const dispatch = useDispatch();
 
   const [name, setName] = useState('');
@@ -27,7 +28,7 @@ export const ContactForm = () => {
       Notiflix.Notify.warning('Please write your name and number');
       return;
     }
-    const isDuplicate = contacts.some(
+    const isDuplicate = arrContacts.some(
       contact => contact.name.toLowerCase() === name.toLowerCase()
     );
 
@@ -35,22 +36,17 @@ export const ContactForm = () => {
       Notiflix.Notify.warning(`${name} is already in the contacts.`);
       return;
     }
-    addNewContact({ name, number });
+   
+    const newContact = {
+        id: nanoid(),
+        name,
+        number,
+      }
+    dispatch(addNewContact(newContact))
     setName('');
     setNumber('');
   };
 
-  const addNewContact = ({ name, number }) => {
-    const newContact = [
-      ...contacts,
-      {
-        id: nanoid(),
-        name,
-        number,
-      },
-    ];
-    dispatch(addContact(newContact));
-  };
 
   return (
     <Form onSubmit={handleSubmit}>
